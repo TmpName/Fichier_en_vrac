@@ -78,13 +78,13 @@ def CheckAADecoder(str):
 #------------------------------------------------------------------------------------------
 
 #open file
-fh = open('G:\\openload\\html.txt', "r")
-sHtmlContent1 = fh.read().decode('utf-16','replace')
+fh = open('G:\\OpenloadExtractor\\page.html', "r")
+sHtmlContent1 = fh.read()#.decode('utf-16','replace')
 fh.close()
 
 #verif
-#print sHtmlContent1[:100]
-sHtmlContent1 = sHtmlContent1.encode('utf-8')
+print sHtmlContent1[:100]
+#sHtmlContent1 = sHtmlContent1.encode('utf-8')
 print isinstance(sHtmlContent1, unicode)
 
 #import codecs
@@ -100,6 +100,7 @@ aResult = re.findall(sPattern,sHtmlContent1)
 if (aResult):
     TabUrl = aResult
     Coded_url = aResult[0][1]
+    print 'item : ' + aResult[0][0]
     print 'key : ' + Coded_url
 else:
     print 'er1'
@@ -130,48 +131,29 @@ code = sHtmlContent3
 
 #---------------------------------------------------------------------------
 
+#1 er decodage
+code = ASCIIDecode(code)
+
+fh = open('G:\\OpenloadExtractor\\output1.txt', "w")
+fh.write(code)
+fh.close()
+
 #extract complete code
 r = re.search(r'type="text\/javascript">(.+?)<\/script>', code,re.DOTALL)
 if r:
     code = r.group(1)
 
-#1 er decodage
-code = ASCIIDecode(code)
 
 #extract first part
-P3 = "\['ready'\]\(function\(\){(.+?)}\);\s*\$\("#videooverlay"
+P3 = "^(.+?)}\);\s*\$\(\"#videooverlay"
 r = re.search(P3, code,re.DOTALL)
 if r:
     code = r.group(1)
 else:
     print 'rt4'
 
-# 1 pass
-r = re.search(r'var (_0x[0-9a-z]+)={(.+?)}};', code,re.DOTALL)
-if r:
-    #on supprime cette partie
-    code = code[:r.start()] + code[r.end():]
-    
-    name1 = r.group(1)
-    pass1 = r.group(2)
-    # Name, param , return
-    tab1 = re.findall(r'\'([a-zA-Z]+)\':function _0x[0-9a-z]+\((.+?)\){return (.+?);}', pass1,re.DOTALL)
-        
-#replace code from 1 pass
-for n,p,r in tab1:
-    code = code.replace(name1 + "['" + n + "']" , n)
-    
-code = re.sub("\['([^']+)'\]",'.\\1',code)
-
 #hexa convertion
 code = re.sub('([^_])(0x[0-9a-f]+)',SubHexa,code)
-
-#insert coded url
-P1 = "[a-zA-Z]+\(\$,[0-9_a-zA-Z\.]+\('#',r\)\)\.text\(\)"
-code = re.sub(P1,"'" + Coded_url + "'",code)
-#insert code tu get result
-P5 = "[a-zA-Z]+\(\$,'#streamurl'\)\.text\((_0x5e5aae.join\(''\))\)"
-code = re.sub(P5,'Result=\\1',code)
  
 #Saut de ligne
 #code = code.replace(';',';\n')
@@ -184,11 +166,11 @@ code = code.replace('\t','')
 
 #hack
 code = code.replace('!![]','true')
+P8 = '\$\(document\).+?\(function\(\){'
+code= re.sub(P8,'\n',code)
+P4 = 'if\(!_[0-9a-z_\[\(\'\)\]]+,document[^;]+\)\){'
+code = re.sub(P4,'if (false) {',code)
 
-#rewrite code
-#1 pass
-for n,p,r in tab1:
-    code = 'function '+ n + '(' + p + ') { return ' + r + '; }\n' + code
 
 #save file
 #code = code.encode('utf-8')
