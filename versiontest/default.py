@@ -31,12 +31,12 @@ class main:
         xbmc.log('>>' + str(xbmc.getInfoLabel('Container.FolderPath')) , xbmc.LOGNOTICE)
         
         #Bidouille anti refresh, marche uniquement sur la page de recherche
-        Actu_page = str(xbmc.getInfoLabel('Container.FolderPath'))
-        if '?disp=search' in Actu_page:
-            if not 'VSTRMSEARCH' in sys.argv[2]:
-                #put1 de refresh
-                xbmc.log('Bloquage refresh', xbmc.LOGNOTICE)
-                return
+        #Actu_page = str(xbmc.getInfoLabel('Container.FolderPath'))
+        #if '?disp=search' in Actu_page:
+        #    if not 'VSTRMSEARCH' in sys.argv[2]:
+        #        #put1 de refresh
+        #        xbmc.log('Bloquage refresh', xbmc.LOGNOTICE)
+        #        return
 
 
         oInputParameterHandler = cInputParameterHandler()
@@ -242,9 +242,10 @@ def searchGlobal():
             if middle > int(cConfig().getSetting('search_ord')):
                 continue
 
+        cConfig().log(str(result['guiElement']))
         result['params'].addParameter('VSTRMSEARCH','1')
         
-        oGui.addFolder(result['guiElement'],result['params'])
+        oGui.addFolder(result['guiElement'],result['params'],False)
         #xbmc.log('%s - %s' % (middle,old_label),  xbmc.LOGNOTICE)
         
     cConfig().finishDialog(dialog)
