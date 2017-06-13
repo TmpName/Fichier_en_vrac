@@ -234,7 +234,7 @@ class cGui():
         self.addFolder(oGuiElement, oOutputParameterHandler)
 
     #afficher les liens non playable
-    def addFolder(self, oGuiElement, oOutputParameterHandler=''):
+    def addFolder(self, oGuiElement, oOutputParameterHandler='',_isFolder=True):
     
         #recherche append les reponses
         if  xbmcgui.Window(10101).getProperty('search') == 'true':
@@ -296,7 +296,7 @@ class cGui():
 
         sPluginHandle = cPluginHandler().getPluginHandle();
 
-        xbmcplugin.addDirectoryItem(sPluginHandle, sItemUrl, oListItem, isFolder=True)
+        xbmcplugin.addDirectoryItem(sPluginHandle, sItemUrl, oListItem, isFolder=_isFolder)
 
 
     def createListItem(self, oGuiElement):
