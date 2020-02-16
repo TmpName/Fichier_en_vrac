@@ -19,6 +19,9 @@ try:
 except ImportError:
     from urllib.parse import urlparse
     
+from decimal import *
+from HTMLParser import HTMLParser
+    
 #old version
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 
@@ -452,7 +455,7 @@ class CloudflareScraper(Session):
             if self.cf_tries >= 3:
                 VSlog('Failed to solve Cloudflare challenge!' )
             elif b'/cdn-cgi/l/chk_captcha' in resp.content:
-                VSlog('Protect by Captcha' )
+                VSlog('Protect by Captcha ()' )
                 #One more try ?
                 if not self.GetCaptha:
                     self.GetCaptha = True
@@ -463,7 +466,13 @@ class CloudflareScraper(Session):
                 return True
 
             elif resp.status_code == 403:
-                VSlog('403 Forbidden' )
+                if '?__cf_chl_captcha_tk__=' in resp.content:
+                    VSlog('Protect by Captcha (403)' )
+                    if not self.GetCaptha:
+                        self.GetCaptha = True
+                        self.cf_tries = 0
+                else:
+                    VSlog('403 Forbidden' )
 
             resp = False
             return False
@@ -479,15 +488,19 @@ class CloudflareScraper(Session):
         if s_match:
             url_end = s_match.group(1)
             
-        url_end = url_end.replace('&amp;','&')
+        url_end = HTMLParser().unescape(url_end)
 
         submit_url = "%s://%s%s" % (parsed_url.scheme, domain,url_end)
+        origin_url = "%s://%s" % (parsed_url.scheme, domain)
 
         cloudflare_kwargs = original_kwargs.copy( )
         #params = cloudflare_kwargs.setdefault("params", OrderedDict())
         data = OrderedDict()
         headers = cloudflare_kwargs.setdefault("headers", {})
+        
+        headers["Origin"] = str(origin_url)
         headers["Referer"] = str(resp.url)
+        
         
         #fh = open('c:\\html.txt', "r")
         #body = fh.read()
@@ -570,8 +583,13 @@ class CloudflareScraper(Session):
         #VSlog('With :' + str(cloudflare_kwargs['headers']))
 
         #submit_url = 'http://httpbin.org/headers'
-        
-        cloudflare_kwargs['data'].update( data )
+
+        #update data by keeping order
+        for a,b in cloudflare_kwargs['data']:
+            if a not in data:
+                data[a] = b
+        cloudflare_kwargs['data'] = data
+
         method = 'POST'
         
         redirect = self.request(method, submit_url, **cloudflare_kwargs) 
@@ -608,9 +626,9 @@ class CloudflareScraper(Session):
         if op == '+':
             return a + b
         elif op == '/':
-            return a / float(b)
+            return a / Decimal(b)
         elif op == '*':
-            return a * float(b)
+            return a * Decimal(b)
         elif op == '-':
             return a - b
         else:
@@ -629,7 +647,7 @@ class CloudflareScraper(Session):
             #remove parenthesis
             section = self.Remove_parenthesis(section,domain)
             
-            return float(section)
+            return Decimal(section)
             
         return Chain_process(expression,domain)
 
@@ -687,7 +705,7 @@ class CloudflareScraper(Session):
             while (p3 < len(s)) and (s[p3].isdigit()):
                 p3 += 1
             
-            c = float(s[p2:p]) / float(s[p+1:p3])
+            c = Decimal(s[p2:p]) / Decimal(s[p+1:p3])
 
             s = s[:p2] + str(c) + s[p3:]
             
