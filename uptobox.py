@@ -133,6 +133,7 @@ class cHoster(iHoster):
 
             UserToken = "abcdef"
             SubTitle = ''
+            api_call = False
             
             if (self.stream):
                 
@@ -167,13 +168,13 @@ class cHoster(iHoster):
                 data = json.loads(sHtmlContent)
                 api_call = data['data']['dlLink']
 
-                if api_call:
-                    if SubTitle:
-                        return True, api_call, SubTitle
-                    else:
-                        return True, api_call
+            if api_call:
+                if SubTitle:
+                    return True, api_call, SubTitle
+                else:
+                    return True, api_call
 
-                return False, False
+            return False, False
 
     def GetMedialinkDL(self, sHtmlContent):
 
