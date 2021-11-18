@@ -166,7 +166,10 @@ class cHoster(iHoster):
             else:
 
                 if '<input class="input-text ui-corner-all" type="password" name="pass"' in sHtmlContent :
-                    VSlog("page protegee par mot de passe")
+                    VSlog("Lien protegee par mot de passe")
+                    if self._password == '':
+                        oDialog = dialog().VSok("Lien protege par mot de passe.")
+                        return False, False
 
                 cookie = self.oPremiumHandler.AddCookies().replace('Cookie=', '', 1)
                 data = {
