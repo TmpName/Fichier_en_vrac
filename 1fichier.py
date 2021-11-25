@@ -73,6 +73,8 @@ class cHoster(iHoster):
 
         self.oPremiumHandler = cPremiumHandler(self.getPluginIdentifier())
         VSlog(self.oPremiumHandler.isPremiumModeAvailable())
+        
+        VSlog("1")
 
         import sys
         if ('site=cDownload&function' not in sys.argv[2]) and not (self.oPremiumHandler.isPremiumModeAvailable()):
@@ -86,6 +88,8 @@ class cHoster(iHoster):
 
     def __getMediaLinkForGuest(self):
         import random
+        
+        VSlog("2")
 
         api_call = False
         url = 'https://1fichier.com/?' + self.__getIdFromUrl(self.__sUrl)
@@ -145,6 +149,8 @@ class cHoster(iHoster):
 
         if not self.oPremiumHandler.Authentificate():
             return False, False
+        
+        VSlog("3")
 
         url = 'https://1fichier.com/?' + self.__getIdFromUrl(self.__sUrl)
 
@@ -157,6 +163,9 @@ class cHoster(iHoster):
 
         sHtmlContent = self.oPremiumHandler.GetHtml('%s' % url + '&e=1')
         if (sHtmlContent):
+            
+            VSlog("4")
+            
             # L'option est désactivée : la réponse sera de type "text/plain; charset=utf-8", exemple :
             # https://serveur-2b.1fichier.com/lelienactif;Film.de.Jacquie.et.Michel.a.la.montagne.mkv;1234567890;0
             m = re.search('^(.*);.*;.*;.*$', sHtmlContent)
@@ -164,6 +173,14 @@ class cHoster(iHoster):
                 url = m.group(1)
             # L'option est activée : pour récupérer le lien direct il faut POSTer le formulaire demandant le download
             else:
+                
+                VSlog("5")
+
+                fh = open('c:\\test.txt', "w")
+                fh.write(sHtmlContent)
+                fh.close()
+                
+                VSlog("6")
 
                 if '<input class="input-text ui-corner-all" type="password" name="pass"' in sHtmlContent :
                     VSlog("Lien protegee par mot de passe")
